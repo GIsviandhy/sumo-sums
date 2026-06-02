@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sumo Sums</title>
+  <link rel="stylesheet" href="style.css" />
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div class="arena-bg" aria-hidden="true"></div>
+
+  <div class="game-shell">
+    <header class="hud">
+      <div class="level-badge" id="levelBadge">LEVEL 1: BASIC</div>
+
+      <div class="map-chip" aria-label="Map progress bar">
+        <div class="map-chip__title">MAP</div>
+        <div class="map-chip__track" aria-hidden="true">
+          <span class="map-chip__win map-chip__win--left"></span>
+          <span class="map-chip__win map-chip__win--right"></span>
+          <span class="map-chip__rail"></span>
+          <span class="map-chip__knot" id="miniKnot"></span>
+        </div>
+      </div>
+
+      <div class="scoreboard" id="scoreboard">SCORE: BLUE 0 – RED 0</div>
+    </header>
+
+    <main class="game-layout">
+      <section class="team-panel team-panel--blue" id="bluePanel" aria-label="Blue team player area">
+        <div class="team-panel__header">
+          <div class="team-badge team-badge--blue">
+            <span class="team-badge__icon" aria-hidden="true">
+              <!-- Shield SVG -->
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 2L3 5.5V11c0 4.1 3.3 7.6 8 8.9 4.7-1.3 8-4.8 8-8.9V5.5L11 2z" fill="#1a52cc" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
+                <path d="M7.5 11l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span>BLUE TEAM</span>
+          </div>
+        </div>
+
+        <article class="question-card">
+          <div class="question-card__label">QUESTION</div>
+          <div class="question-card__math" id="blueQuestion"></div>
+          <div class="question-card__helper" id="blueHelper">Enter answer, then press OK</div>
+        </article>
+
+        <div class="answer-display" id="blueAnswer" aria-live="polite">_</div>
+
+        <div class="numpad" id="blueNumpad" aria-label="Blue team keypad">
+          <button class="key key--digit" data-team="blue" data-key="7">7</button>
+          <button class="key key--digit" data-team="blue" data-key="8">8</button>
+          <button class="key key--digit" data-team="blue" data-key="9">9</button>
+          <button class="key key--digit" data-team="blue" data-key="4">4</button>
+          <button class="key key--digit" data-team="blue" data-key="5">5</button>
+          <button class="key key--digit" data-team="blue" data-key="6">6</button>
+          <button class="key key--digit" data-team="blue" data-key="1">1</button>
+          <button class="key key--digit" data-team="blue" data-key="2">2</button>
+          <button class="key key--digit" data-team="blue" data-key="3">3</button>
+          <button class="key key--digit key--wide" data-team="blue" data-key="0">0</button>
+          <button class="key key--action key--clear" data-team="blue" data-action="clear">CLR</button>
+          <button class="key key--action key--ok key--full" data-team="blue" data-action="submit">OK</button>
+        </div>
+      </section>
+
+      <section class="center-stage" aria-label="Arena center stage">
+        <div class="center-stage__top"></div>
+
+        <div class="arena-ring" id="tugOfWar">
+          <div class="arena-crowd arena-crowd--left" aria-hidden="true"></div>
+          <div class="arena-crowd arena-crowd--right" aria-hidden="true"></div>
+
+          <div class="win-line win-line--left" aria-hidden="true"></div>
+          <div class="win-line win-line--right" aria-hidden="true"></div>
+
+          <div class="sumo-stage" aria-hidden="true">
+            <!-- Blue Sumo Wrestler (faces right) -->
+            <svg id="blueAvatar" class="sumo-svg sumo-svg--blue" viewBox="0 0 120 200" width="120" height="200" aria-hidden="true">
+              <!-- legs wide stance -->
+              <ellipse cx="38" cy="185" rx="18" ry="14" fill="#f5c89a" stroke="#111" stroke-width="3"/>
+              <ellipse cx="82" cy="185" rx="18" ry="14" fill="#f5c89a" stroke="#111" stroke-width="3"/>
+              <!-- body -->
+              <ellipse cx="60" cy="130" rx="46" ry="52" fill="#f5c89a" stroke="#111" stroke-width="4"/>
+              <!-- mawashi (belt) -->
+              <rect x="22" y="148" width="76" height="26" rx="13" fill="#1a52cc" stroke="#111" stroke-width="3"/>
+              <rect x="44" y="144" width="32" height="34" rx="8" fill="#1a52cc" stroke="#111" stroke-width="3"/>
+              <!-- belly highlight -->
+              <ellipse cx="60" cy="118" rx="22" ry="20" fill="rgba(255,255,255,0.18)" stroke="none"/>
+              <!-- head -->
+              <ellipse cx="60" cy="60" rx="36" ry="38" fill="#f5c89a" stroke="#111" stroke-width="4"/>
+              <!-- face: eyes -->
+              <circle cx="48" cy="56" r="5" fill="#111"/>
+              <circle cx="72" cy="56" r="5" fill="#111"/>
+              <circle cx="50" cy="54" r="2" fill="#fff"/>
+              <circle cx="74" cy="54" r="2" fill="#fff"/>
+              <!-- eyebrows angry -->
+              <line x1="42" y1="46" x2="54" y2="50" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+              <line x1="66" y1="50" x2="78" y2="46" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+              <!-- mouth -->
+              <path d="M50 70 Q60 76 70 70" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <!-- topknot -->
+              <ellipse cx="60" cy="24" rx="10" ry="7" fill="#3a2a10" stroke="#111" stroke-width="2"/>
+              <rect x="56" y="22" width="8" height="16" rx="4" fill="#3a2a10" stroke="#111" stroke-width="2"/>
+              <!-- left arm (toward rope, extended right) -->
+              <rect x="96" y="108" width="38" height="20" rx="10" fill="#f5c89a" stroke="#111" stroke-width="3"/>
+              <!-- right arm (back, extended left) -->
+              <rect x="-14" y="112" width="38" height="18" rx="9" fill="#f5c89a" stroke="#111" stroke-width="3"/>
+              <!-- blue accent stripe on body -->
+              <rect x="22" y="138" width="76" height="8" rx="4" fill="#1a52cc" opacity="0.35" stroke="none"/>
+            </svg>
+
+            <!-- Rope -->
+            <div class="rope" aria-hidden="true">
+              <svg class="rope__svg" preserveAspectRatio="none" viewBox="0 0 600 42" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="ropePattern" x="0" y="0" width="24" height="14" patternUnits="userSpaceOnUse">
+                    <rect width="24" height="14" fill="#c8a46e"/>
+                    <line x1="0" y1="14" x2="24" y2="0" stroke="#8B5E3C" stroke-width="3" opacity="0.55"/>
+                    <line x1="-12" y1="14" x2="12" y2="0" stroke="#8B5E3C" stroke-width="3" opacity="0.55"/>
+                    <line x1="12" y1="14" x2="36" y2="0" stroke="#8B5E3C" stroke-width="3" opacity="0.55"/>
+                  </pattern>
+                </defs>
+                <rect x="0" y="14" width="600" height="14" rx="7" fill="url(#ropePattern)" stroke="#111" stroke-width="3"/>
+              </svg>
+              <span class="rope__knot" id="ropeKnot"></span>
+            </div>
+
+            <!-- Red Sumo Wrestler (faces left, mirrored) -->
+            <svg id="redAvatar" class="sumo-svg sumo-svg--red" viewBox="0 0 120 200" width="120" height="200" aria-hidden="true" style="transform:scaleX(-1)">
+              <!-- legs wide stance -->
+              <ellipse cx="38" cy="185" rx="18" ry="14" fill="#f5c89a" stroke="#111" stroke-width="3"/>
+              <ellipse cx="82" cy="185" rx="18" ry="14" fill="#f5c89a" stroke="#111" stroke-width="3"/>
+              <!-- body -->
+              <ellipse cx="60" cy="130" rx="46" ry="52" fill="#f5c89a" stroke="#111" stroke-width="4"/>
+              <!-- mawashi (belt) -->
+              <rect x="22" y="148" width="76" height="26" rx="13" fill="#cc1a1a" stroke="#111" stroke-width="3"/>
+              <rect x="44" y="144" width="32" height="34" rx="8" fill="#cc1a1a" stroke="#111" stroke-width="3"/>
+              <!-- belly highlight -->
+              <ellipse cx="60" cy="118" rx="22" ry="20" fill="rgba(255,255,255,0.18)" stroke="none"/>
+              <!-- head -->
+              <ellipse cx="60" cy="60" rx="36" ry="38" fill="#f5c89a" stroke="#111" stroke-width="4"/>
+              <!-- face: eyes -->
+              <circle cx="48" cy="56" r="5" fill="#111"/>
+              <circle cx="72" cy="56" r="5" fill="#111"/>
+              <circle cx="50" cy="54" r="2" fill="#fff"/>
+              <circle cx="74" cy="54" r="2" fill="#fff"/>
+              <!-- eyebrows angry -->
+              <line x1="42" y1="46" x2="54" y2="50" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+              <line x1="66" y1="50" x2="78" y2="46" stroke="#111" stroke-width="3" stroke-linecap="round"/>
+              <!-- mouth -->
+              <path d="M50 70 Q60 76 70 70" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <!-- topknot -->
+              <ellipse cx="60" cy="24" rx="10" ry="7" fill="#3a2a10" stroke="#111" stroke-width="2"/>
+              <rect x="56" y="22" width="8" height="16" rx="4" fill="#3a2a10" stroke="#111" stroke-width="2"/>
+              <!-- left arm (toward rope, extended right) -->
+              <rect x="96" y="108" width="38" height="20" rx="10" fill="#f5c89a" stroke="#111" stroke-width="3"/>
+              <!-- right arm (back, extended left) -->
+              <rect x="-14" y="112" width="38" height="18" rx="9" fill="#f5c89a" stroke="#111" stroke-width="3"/>
+              <!-- red accent stripe on body -->
+              <rect x="22" y="138" width="76" height="8" rx="4" fill="#cc1a1a" opacity="0.35" stroke="none"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="stage-status" id="roundStatus">Ready</div>
+        <button class="start-btn" id="startBtn">&#9654; START GAME</button>
+      </section>
+
+      <section class="team-panel team-panel--red" id="redPanel" aria-label="Red team player area">
+        <div class="team-panel__header">
+          <div class="team-badge team-badge--red">
+            <span class="team-badge__icon" aria-hidden="true">
+              <!-- Flame SVG -->
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 2c0 0-1 3.5 1 5.5C13.5 9.5 14 7 14 7c2 3 1.5 6-1 8-1 .8-2.2 1.3-3 1.3C7.2 16.3 5 14 5 11c0-2 1-3.5 2-4.5 0 1.5 1 2.5 2 2.5C10 9 11 7 11 2z" fill="#cc1a1a" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/>
+                <ellipse cx="11" cy="16.5" rx="2.5" ry="1.5" fill="#ff7a00" opacity="0.7"/>
+              </svg>
+            </span>
+            <span>RED TEAM</span>
+          </div>
+        </div>
+
+        <article class="question-card question-card--red">
+          <div class="question-card__label">QUESTION</div>
+          <div class="question-card__math" id="redQuestion"></div>
+          <div class="question-card__helper" id="redHelper">Enter answer, then press OK</div>
+        </article>
+
+        <div class="answer-display answer-display--red" id="redAnswer" aria-live="polite">_</div>
+
+        <div class="numpad" id="redNumpad" aria-label="Red team keypad">
+          <button class="key key--digit" data-team="red" data-key="7">7</button>
+          <button class="key key--digit" data-team="red" data-key="8">8</button>
+          <button class="key key--digit" data-team="red" data-key="9">9</button>
+          <button class="key key--digit" data-team="red" data-key="4">4</button>
+          <button class="key key--digit" data-team="red" data-key="5">5</button>
+          <button class="key key--digit" data-team="red" data-key="6">6</button>
+          <button class="key key--digit" data-team="red" data-key="1">1</button>
+          <button class="key key--digit" data-team="red" data-key="2">2</button>
+          <button class="key key--digit" data-team="red" data-key="3">3</button>
+          <button class="key key--digit key--wide" data-team="red" data-key="0">0</button>
+          <button class="key key--action key--clear" data-team="red" data-action="clear">CLR</button>
+          <button class="key key--action key--ok key--full" data-team="red" data-action="submit">OK</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="overlay overlay--victory" id="victoryOverlay" hidden aria-hidden="true">
+    <div class="victory-card">
+      <div class="victory-card__banner" id="victoryBanner"></div>
+      <div class="victory-card__trophy">🏆</div>
+      <div class="victory-card__title" id="victoryTitle">WINNER!</div>
+      <div class="victory-card__team" id="victoryTeam">BLUE TEAM</div>
+      <div class="victory-card__subtitle" id="victorySubtitle">The knot crossed the win line.</div>
+      <div class="victory-card__score" id="victoryScore"></div>
+      <button class="victory-card__button" id="restartButton">&#9654; PLAY AGAIN</button>
+    </div>
+  </div>
+
+  <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+</body>
+</html>
