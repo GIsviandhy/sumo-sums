@@ -33,7 +33,7 @@ const state = {
   level: LEVEL,
   ropeOffset: 0,
   maxOffset: 260,
-  winOffset: 190,
+  winOffset: 152,
   pullStep: 42,
   penaltyStep: 14,
   score: {
@@ -61,7 +61,6 @@ const elements = {
   victorySubtitle: document.getElementById("victorySubtitle"),
   victoryScore: document.getElementById("victoryScore"),
   restartButton: document.getElementById("restartButton"),
-  startBtn: document.getElementById("startBtn"),
   gameShell: document.querySelector(".game-shell"),
   confettiLayer: document.getElementById("confettiLayer"),
 };
@@ -70,7 +69,6 @@ function createTeamState(team) {
   return {
     team,
     input: "",
-    lockedUntil: 0,
     question: null,
     questionText: "",
   };
@@ -79,16 +77,9 @@ function createTeamState(team) {
 function init() {
   setupControls();
   setupRestart();
-  setupStartButton();
   generateQuestion("blue");
   generateQuestion("red");
   renderAll();
-}
-
-function setupStartButton() {
-  elements.startBtn.addEventListener("click", () => {
-    elements.gameShell.classList.add("game-active");
-  });
 }
 
 function setupControls() {
@@ -115,9 +106,7 @@ function handleInputClick(event) {
   const action = button.dataset.action;
   const digit = button.dataset.key;
 
-  if (!team || state.victory || state.locked || isTeamLocked(team)) {
-    return;
-  }
+  if (!team || state.victory) return;
 
   if (digit !== undefined) {
     appendDigit(team, digit);
@@ -135,7 +124,7 @@ function handleInputClick(event) {
 }
 
 function handleKeyboardInput(event) {
-  if (state.victory || state.locked) return;
+  if (state.victory) return;
 
   if (/^[0-9]$/.test(event.key)) {
     appendDigit("blue", event.key);
@@ -152,10 +141,6 @@ function handleKeyboardInput(event) {
   }
 }
 
-function isTeamLocked(team) {
-  return Date.now() < state.teams[team].lockedUntil;
-}
-
 function appendDigit(team, digit) {
   const teamState = state.teams[team];
   teamState.input = `${teamState.input}${digit}`.slice(0, 3);
@@ -169,7 +154,7 @@ function clearInput(team) {
 
 function submitAnswer(team) {
   const teamState = state.teams[team];
-  if (!teamState.question || isTeamLocked(team)) return;
+  if (!teamState.question) return;
 
   const expected = String(teamState.question.answer);
   const guess = teamState.input || "";
@@ -183,7 +168,7 @@ function submitAnswer(team) {
 }
 
 function handleCorrectAnswer(team) {
-  if (state.locked || state.victory) return;
+  if (state.victory) return;
 
   playCorrectSound();
   playPullSound();
@@ -208,20 +193,12 @@ function handleIncorrectAnswer(team) {
   const direction = opponent === "blue" ? -1 : 1;
 
   state.ropeOffset = clamp(state.ropeOffset + direction * state.penaltyStep, -state.maxOffset, state.maxOffset);
-  state.teams[team].lockedUntil = Date.now() + 1500;
 
   pulseAvatar(opponent);
   animateRope();
   updateRoundStatus(`${TEAM_CONFIG[team].label} missed`);
+  state.teams[team].input = "";
   renderAll();
-
-  window.setTimeout(() => {
-    if (!state.victory) {
-      state.teams[team].lockedUntil = 0;
-      renderTeam(team);
-      updateRoundStatus("Keep going");
-    }
-  }, 1500);
 }
 
 function pulseAvatar(team) {
@@ -239,7 +216,10 @@ function pulseAvatar(team) {
 
 function animateRope() {
   const offsetPercent = (state.ropeOffset / state.maxOffset) * 38;
+  const winPercent = (state.winOffset / state.maxOffset) * 38;
   elements.tugOfWar.style.setProperty("--rope-offset", `${state.ropeOffset}px`);
+  elements.tugOfWar.style.setProperty("--win-pct", `${winPercent}%`);
+  document.querySelector(".map-chip__track").style.setProperty("--win-pct", `${winPercent}%`);
   elements.ropeKnot.style.left = `${50 + offsetPercent}%`;
   elements.miniKnot.style.left = `${50 + offsetPercent}%`;
 }
@@ -288,8 +268,6 @@ function restartRound() {
   state.ropeOffset = 0;
   state.teams.blue.input = "";
   state.teams.red.input = "";
-  state.teams.blue.lockedUntil = 0;
-  state.teams.red.lockedUntil = 0;
   elements.victoryOverlay.hidden = true;
   elements.victoryOverlay.setAttribute("aria-hidden", "true");
   elements.confettiLayer.innerHTML = "";
@@ -394,17 +372,12 @@ function renderTeam(team) {
   questionEl.textContent = teamState.questionText;
   answerEl.textContent = teamState.input || "_";
 
-  if (isTeamLocked(team)) {
-    helperEl.textContent = "Locked for 1.5 seconds...";
-    panelEl.classList.add("is-disabled");
-  } else {
-    panelEl.classList.remove("is-disabled");
-    helperEl.textContent = "Enter answer, then press OK";
-  }
+  panelEl.classList.remove("is-disabled");
+  helperEl.textContent = "Enter answer, then press OK";
 }
 
 function updateScoreboard() {
-  elements.scoreboard.textContent = `B ${state.score.blue} – R ${state.score.red}`;
+  elements.scoreboard.textContent = `BLUE ${state.score.blue} – RED ${state.score.red}`;
 }
 
 function updateLevelBadge() {

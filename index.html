@@ -15,7 +15,6 @@
       <div class="level-badge" id="levelBadge">LEVEL 1: BASIC</div>
 
       <div class="map-chip" aria-label="Map progress bar">
-        <div class="map-chip__title">MAP</div>
         <div class="map-chip__track" aria-hidden="true">
           <span class="map-chip__win map-chip__win--left"></span>
           <span class="map-chip__win map-chip__win--right"></span>
@@ -24,7 +23,7 @@
         </div>
       </div>
 
-      <div class="scoreboard" id="scoreboard">SCORE: BLUE 0 – RED 0</div>
+      <div class="scoreboard" id="scoreboard">BLUE 0 – RED 0</div>
     </header>
 
     <main class="game-layout">
@@ -32,10 +31,14 @@
         <div class="team-panel__header">
           <div class="team-badge team-badge--blue">
             <span class="team-badge__icon" aria-hidden="true">
-              <!-- Shield SVG -->
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11 2L3 5.5V11c0 4.1 3.3 7.6 8 8.9 4.7-1.3 8-4.8 8-8.9V5.5L11 2z" fill="#1a52cc" stroke="#111" stroke-width="1.8" stroke-linejoin="round"/>
-                <path d="M7.5 11l2.5 2.5 4.5-4.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- sumo silhouette blue -->
+                <ellipse cx="14" cy="7" rx="5" ry="5.5" fill="#1a52cc"/>
+                <ellipse cx="14" cy="18" rx="8" ry="7" fill="#1a52cc"/>
+                <ellipse cx="7" cy="22" rx="3.5" ry="5" fill="#1a52cc"/>
+                <ellipse cx="21" cy="22" rx="3.5" ry="5" fill="#1a52cc"/>
+                <rect x="4" y="15" width="6" height="3" rx="1.5" fill="#1a52cc"/>
+                <rect x="18" y="15" width="6" height="3" rx="1.5" fill="#1a52cc"/>
               </svg>
             </span>
             <span>BLUE TEAM</span>
@@ -166,17 +169,20 @@
         </div>
 
         <div class="stage-status" id="roundStatus">Ready</div>
-        <button class="start-btn" id="startBtn">&#9654; START GAME</button>
       </section>
 
       <section class="team-panel team-panel--red" id="redPanel" aria-label="Red team player area">
         <div class="team-panel__header">
           <div class="team-badge team-badge--red">
             <span class="team-badge__icon" aria-hidden="true">
-              <!-- Flame SVG -->
-              <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M11 2c0 0-1 3.5 1 5.5C13.5 9.5 14 7 14 7c2 3 1.5 6-1 8-1 .8-2.2 1.3-3 1.3C7.2 16.3 5 14 5 11c0-2 1-3.5 2-4.5 0 1.5 1 2.5 2 2.5C10 9 11 7 11 2z" fill="#cc1a1a" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/>
-                <ellipse cx="11" cy="16.5" rx="2.5" ry="1.5" fill="#ff7a00" opacity="0.7"/>
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- sumo silhouette red -->
+                <ellipse cx="14" cy="7" rx="5" ry="5.5" fill="#cc1a1a"/>
+                <ellipse cx="14" cy="18" rx="8" ry="7" fill="#cc1a1a"/>
+                <ellipse cx="7" cy="22" rx="3.5" ry="5" fill="#cc1a1a"/>
+                <ellipse cx="21" cy="22" rx="3.5" ry="5" fill="#cc1a1a"/>
+                <rect x="4" y="15" width="6" height="3" rx="1.5" fill="#cc1a1a"/>
+                <rect x="18" y="15" width="6" height="3" rx="1.5" fill="#cc1a1a"/>
               </svg>
             </span>
             <span>RED TEAM</span>
@@ -212,7 +218,21 @@
   <div class="overlay overlay--victory" id="victoryOverlay" hidden aria-hidden="true">
     <div class="victory-card">
       <div class="victory-card__banner" id="victoryBanner"></div>
-      <div class="victory-card__trophy">🏆</div>
+      <div class="victory-card__trophy">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- cup body -->
+          <path d="M20 8h24v20c0 8.8-5.4 15-12 15S20 36.8 20 28V8z" fill="#f0c030" stroke="#8a6a00" stroke-width="2"/>
+          <!-- handles -->
+          <path d="M20 14c-4 0-7 3-7 7s3 7 7 7" stroke="#8a6a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M44 14c4 0 7 3 7 7s-3 7-7 7" stroke="#8a6a00" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- stem -->
+          <rect x="28" y="43" width="8" height="10" rx="2" fill="#f0c030" stroke="#8a6a00" stroke-width="2"/>
+          <!-- base -->
+          <rect x="20" y="53" width="24" height="5" rx="3" fill="#f0c030" stroke="#8a6a00" stroke-width="2"/>
+          <!-- shine -->
+          <path d="M26 13 Q29 11 30 16" stroke="rgba(255,255,255,0.55)" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
       <div class="victory-card__title" id="victoryTitle">WINNER!</div>
       <div class="victory-card__team" id="victoryTeam">BLUE TEAM</div>
       <div class="victory-card__subtitle" id="victorySubtitle">The knot crossed the win line.</div>

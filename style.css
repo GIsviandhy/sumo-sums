@@ -19,13 +19,13 @@
   --radius-lg: 24px;
   --radius-md: 18px;
   --radius-sm: 14px;
-  --panel-width: minmax(270px, 300px);
-  --center-width: minmax(380px, 1fr);
+  --panel-width: minmax(210px, 240px);
+  --center-width: minmax(280px, 1fr);
   --font-ui: "Fredoka One", "Nunito", "Arial Rounded MT Bold", "Arial", sans-serif;
   --font-body: "Nunito", "Segoe UI", Arial, sans-serif;
-  --topbar-height: 72px;
-  --avatar-size: clamp(76px, 8vw, 124px);
-  --arena-height: min(58vh, 520px);
+  --topbar-height: 52px;
+  --avatar-size: clamp(54px, 5.5vw, 90px);
+  --arena-height: min(36vh, 320px);
 }
 
 * {
@@ -83,20 +83,20 @@ button:focus-visible {
 .game-shell {
   position: relative;
   width: 100%;
-  min-height: 100vh;
-  padding: 8px;
+  height: 100vh;
+  overflow: hidden;
+  padding: 6px;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 8px;
+  gap: 6px;
 }
 
 .hud {
-  min-height: var(--topbar-height);
+  height: var(--topbar-height);
   display: grid;
-  grid-template-columns: 1fr minmax(220px, 380px) 1fr;
+  grid-template-columns: 1fr minmax(180px, 360px) 1fr;
   align-items: center;
-  gap: 8px;
-  /* badges sit at their natural width inside their grid cell */
+  gap: 6px;
 }
 
 .map-chip,
@@ -115,19 +115,19 @@ button:focus-visible {
 .scoreboard {
   display: inline-flex;
   align-items: center;
-  padding: 9px 16px;
+  padding: 6px 12px;
   background: #1a1f30;
   color: var(--cream);
   font-family: var(--font-ui);
-  font-size: clamp(11px, 0.95vw, 14px);
+  font-size: clamp(10px, 0.85vw, 13px);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   line-height: 1;
   white-space: nowrap;
-  border: 3px solid rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
 }
 
 .level-badge {
@@ -142,18 +142,20 @@ button:focus-visible {
 .map-chip {
   justify-self: center;
   width: 100%;
-  padding: 8px 10px 10px;
-  background: #1a1f30;
+  padding: 0;
+  background: transparent;
   color: var(--cream);
+  border: none;
+  box-shadow: none;
 }
 
 .map-chip__title {
   text-align: center;
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.08em;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .map-chip__track {
@@ -164,6 +166,7 @@ button:focus-visible {
   /* Blue-left → neutral-center → red-right directional gradient */
   background: linear-gradient(90deg, #1a3a8a 0%, #2d4a6e 30%, #4a3030 70%, #8a1a1a 100%);
   overflow: visible;
+  clip-path: inset(0 25% 0 25% round 999px);
 }
 
 .map-chip__rail {
@@ -187,11 +190,11 @@ button:focus-visible {
 }
 
 .map-chip__win--left {
-  left: 18%;
+  left: calc(50% - var(--win-pct, 42%));
 }
 
 .map-chip__win--right {
-  right: 18%;
+  right: calc(50% - var(--win-pct, 42%));
 }
 
 .map-chip__knot {
@@ -213,21 +216,22 @@ button:focus-visible {
 .game-layout {
   display: grid;
   grid-template-columns: var(--panel-width) var(--center-width) var(--panel-width);
-  gap: 8px;
+  gap: 6px;
   align-items: stretch;
-  min-height: calc(100vh - var(--topbar-height) - 24px);
+  min-height: 0;
 }
 
 .team-panel {
   min-width: 0;
-  padding: 10px;
+  padding: 6px;
   display: grid;
   grid-template-rows: auto auto auto 1fr;
-  gap: 8px;
+  gap: 5px;
   align-content: start;
-  border: 5px solid var(--outline);
+  border: 4px solid var(--outline);
   border-radius: var(--radius-xl);
-  box-shadow: 0 10px 0 var(--outline);
+  box-shadow: 0 6px 0 var(--outline);
+  overflow: hidden;
 }
 
 .team-panel--blue {
@@ -246,15 +250,15 @@ button:focus-visible {
 
 .team-badge {
   width: 100%;
-  padding: 10px 12px;
+  padding: 6px 8px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   justify-content: center;
   background: var(--white);
   color: var(--ink);
   font-family: var(--font-ui);
-  font-size: clamp(15px, 1.6vw, 21px);
+  font-size: clamp(11px, 1.1vw, 15px);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -265,7 +269,7 @@ button:focus-visible {
 }
 
 .question-card {
-  padding: 12px;
+  padding: 6px 8px;
   background: var(--white);
   color: var(--ink);
 }
@@ -275,52 +279,53 @@ button:focus-visible {
 }
 
 .question-card__label {
-  margin-bottom: 8px;
+  margin-bottom: 3px;
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .question-card__math {
-  min-height: 72px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 8px;
+  padding: 2px 6px;
   text-align: center;
   font-family: var(--font-ui);
-  font-size: clamp(2rem, 3vw, 3rem);
+  font-size: clamp(1.1rem, 1.6vw, 1.8rem);
   font-weight: 900;
   line-height: 1.1;
   color: var(--ink);
   word-break: break-word;
+  overflow: hidden;
 }
 
 .question-card__helper {
-  margin-top: 4px;
+  margin-top: 2px;
   text-align: center;
-  font-size: 14px;
+  font-size: 10px;
   font-weight: 800;
   color: #31405b;
 }
 
 .answer-display {
-  min-height: 60px;
+  min-height: 44px;
   width: 100%;
   display: grid;
   place-items: center;
-  padding: 10px 14px;
+  padding: 4px 10px;
   background: #0d1a2e;
   color: #a8d4ff;
   font-family: var(--font-ui);
-  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-size: clamp(1.2rem, 1.8vw, 1.8rem);
   font-weight: 900;
   letter-spacing: 0.06em;
   border: 3px solid rgba(168, 212, 255, 0.45);
   border-radius: var(--radius-md);
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5), 0 4px 0 var(--outline);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5), 0 3px 0 var(--outline);
 }
 
 .answer-display--red {
@@ -332,7 +337,7 @@ button:focus-visible {
 .numpad {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 4px;
   padding: 0;
   border: 0;
   box-shadow: none;
@@ -340,18 +345,18 @@ button:focus-visible {
 }
 
 .key {
-  min-height: 60px;
-  min-width: 60px;
+  min-height: 40px;
+  min-width: 0;
   display: grid;
   place-items: center;
-  border: 5px solid var(--outline);
-  border-radius: 18px;
+  border: 3px solid var(--outline);
+  border-radius: 10px;
   background: #fefefe;
   color: var(--ink);
   font-family: var(--font-ui);
-  font-size: clamp(1.4rem, 2vw, 1.8rem);
+  font-size: clamp(0.9rem, 1.2vw, 1.3rem);
   font-weight: 900;
-  box-shadow: 0 7px 0 var(--outline);
+  box-shadow: 0 4px 0 var(--outline);
   transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
   touch-action: manipulation;
 }
@@ -393,7 +398,7 @@ button:focus-visible {
   min-width: 0;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 8px;
+  gap: 5px;
   padding: 0;
 }
 
@@ -511,11 +516,11 @@ button:focus-visible {
 }
 
 .win-line--left {
-  left: 18%;
+  left: 0;
 }
 
 .win-line--right {
-  right: 18%;
+  right: 0;
 }
 
 .sumo-stage {
@@ -577,43 +582,16 @@ button:focus-visible {
 
 .stage-status {
   justify-self: center;
-  padding: 8px 12px;
+  padding: 5px 10px;
   background: var(--cream);
   color: var(--ink);
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.start-btn {
-  display: block;
-  margin: 6px auto 0;
-  min-width: 180px;
-  min-height: 50px;
-  padding: 0 32px;
-  background: #f0c030;
-  color: #1a1200;
-  font-family: var(--font-ui);
-  font-size: 1.2rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  border: 4px solid #111;
-  border-radius: 999px;
-  box-shadow: 0 6px 0 #111;
-  cursor: pointer;
-  transition: transform 100ms ease, box-shadow 100ms ease;
-}
-
-.start-btn:active {
-  transform: translateY(4px);
-  box-shadow: 0 2px 0 #111;
-}
-
-.game-active .start-btn {
-  display: none;
-}
 
 .overlay {
   position: fixed;
@@ -652,9 +630,9 @@ button:focus-visible {
 .victory-card--red  .victory-card__banner { background: #cc1a1a; }
 
 .victory-card__trophy {
-  font-size: 3.5rem;
+  display: flex;
+  justify-content: center;
   margin: 22px 0 6px;
-  line-height: 1;
 }
 
 .victory-card__title {
@@ -838,124 +816,32 @@ button:focus-visible {
 
 @media (min-width: 1025px) and (max-width: 1360px) {
   :root {
-    --panel-width: minmax(250px, 285px);
-    --topbar-height: 84px;
-    --avatar-size: clamp(86px, 9vw, 132px);
-    --arena-height: min(68vh, 640px);
-  }
-
-  .game-shell {
-    padding: 8px;
-  }
-
-  .hud,
-  .game-layout {
-    gap: 8px;
-  }
-
-  .question-card__math {
-    min-height: 84px;
-    font-size: clamp(2rem, 2.2vw, 2.8rem);
-  }
-
-  .key {
-    min-height: 60px;
-    font-size: clamp(1.4rem, 1.8vw, 1.7rem);
-  }
-
-  .sumo-stage {
-    padding: 0 24px;
-  }
-
-  .rope {
-    width: min(56vw, 700px);
+    --panel-width: minmax(210px, 240px);
+    --topbar-height: 52px;
+    --avatar-size: clamp(54px, 5.5vw, 90px);
+    --arena-height: min(36vh, 320px);
   }
 }
 
 @media (max-width: 1024px) {
   :root {
-    --panel-width: minmax(200px, 235px);
-    --center-width: minmax(250px, 1fr);
-    --avatar-size: clamp(64px, 6.8vw, 92px);
-    --arena-height: min(44vh, 340px);
-  }
-
-  .game-shell {
-    padding: 6px;
-    gap: 6px;
+    --panel-width: minmax(170px, 200px);
+    --center-width: minmax(220px, 1fr);
+    --avatar-size: clamp(44px, 5vw, 70px);
+    --arena-height: min(32vh, 260px);
   }
 
   .game-layout {
-    gap: 6px;
-    min-height: calc(100vh - var(--topbar-height) - 18px);
-  }
-
-  .team-panel {
-    padding: 8px;
-    gap: 6px;
-  }
-
-  .level-badge,
-  .scoreboard {
-    padding: 7px 14px;
-    font-size: clamp(12px, 1.1vw, 15px);
-  }
-
-  .map-chip {
-    padding: 7px 8px 8px;
-  }
-
-  .map-chip__title {
-    margin-bottom: 6px;
-    font-size: 12px;
-  }
-
-  .question-card {
-    padding: 10px;
-  }
-
-  .question-card__math {
-    min-height: 58px;
-    font-size: clamp(2rem, 2.2vw, 2.6rem);
-  }
-
-  .answer-display {
-    min-height: 60px;
-    font-size: clamp(1.8rem, 2.4vw, 2.2rem);
+    gap: 4px;
   }
 
   .key,
   .numpad__spacer {
-    min-height: 60px;
-  }
-
-  .key {
-    font-size: clamp(1.4rem, 1.6vw, 1.6rem);
-  }
-
-  .stage-status {
-    font-size: 12px;
-    padding: 7px 10px;
+    min-height: 34px;
   }
 
   .rope {
-    width: min(56vw, 560px);
-  }
-
-  .win-line--left {
-    left: 16%;
-  }
-
-  .win-line--right {
-    right: 16%;
-  }
-
-  .map-chip__win--left {
-    left: 16%;
-  }
-
-  .map-chip__win--right {
-    right: 16%;
+    width: min(56vw, 460px);
   }
 }
 
@@ -1004,8 +890,8 @@ button:focus-visible {
   }
 
   .question-card__math {
-    min-height: 50px;
-    font-size: clamp(2rem, 4.2vw, 2.4rem);
+    height: 50px;
+    font-size: clamp(1.2rem, 3.8vw, 1.8rem);
   }
 
   .question-card__helper {
