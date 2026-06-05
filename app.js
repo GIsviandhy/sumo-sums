@@ -56,6 +56,10 @@ const elements = {
   victorySubtitle: document.getElementById("victorySubtitle"),
   victoryScore: document.getElementById("victoryScore"),
   restartButton: document.getElementById("restartButton"),
+  pauseBtn: document.getElementById("pauseBtn"),
+  pauseModal: document.getElementById("pauseModal"),
+  resumeGameBtn: document.getElementById("resumeGameBtn"),
+  resetGameBtn: document.getElementById("resetGameBtn"),
   gameShell: document.querySelector(".game-shell"),
   confettiLayer: document.getElementById("confettiLayer"),
 };
@@ -74,6 +78,7 @@ function init() {
   setupControls();
   setupRestart();
   setupModeButtons();
+  setupPauseModal();
   generateQuestion("blue");
   generateQuestion("red");
   renderAll();
@@ -97,6 +102,41 @@ function setupModeButtons() {
   document.querySelectorAll(".mode-btn").forEach((button) => {
     button.addEventListener("click", handleModeClick);
   });
+}
+
+function setupPauseModal() {
+  elements.pauseBtn?.addEventListener("click", () => {
+    elements.pauseModal?.classList.remove("hidden");
+  });
+
+  elements.resumeGameBtn?.addEventListener("click", () => {
+    elements.pauseModal?.classList.add("hidden");
+  });
+
+  elements.resetGameBtn?.addEventListener("click", resetGame);
+}
+
+function resetGame() {
+  state.score.blue = 0;
+  state.score.red = 0;
+  state.ropeOffset = 0;
+  state.victory = false;
+  state.locked = false;
+
+  elements.pauseModal?.classList.add("hidden");
+  elements.victoryOverlay.hidden = true;
+  elements.victoryOverlay.setAttribute("aria-hidden", "true");
+  elements.confettiLayer.innerHTML = "";
+
+  document.querySelectorAll(".sumo-svg").forEach((avatar) => {
+    avatar.classList.remove("is-winning", "is-pulling-blue", "is-pulling-red");
+  });
+
+  generateQuestion("blue");
+  generateQuestion("red");
+  updateScoreboard();
+  updateRoundStatus("Ready");
+  renderAll();
 }
 
 function handleModeClick(event) {

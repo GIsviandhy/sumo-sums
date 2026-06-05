@@ -12,6 +12,12 @@
 
   <div class="game-shell">
   <header class="hud">
+    <button class="pause-btn" id="pauseBtn" type="button" aria-label="Pause game">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+        <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"/>
+      </svg>
+    </button>
 
     <div class="map-chip" aria-label="Map progress bar">
       <div class="map-chip__track" aria-hidden="true">
@@ -268,5 +274,15 @@
   </div>
 
   <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+
+  <div class="modal-overlay hidden" id="pauseModal" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="modal-card">
+      <div class="modal-card__title" id="pauseTitle">Game Paused</div>
+      <div class="modal-card__actions">
+        <button class="modal-button modal-button--primary" id="resumeGameBtn" type="button">Resume</button>
+        <button class="modal-button modal-button--secondary" id="resetGameBtn" type="button">New Game</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
