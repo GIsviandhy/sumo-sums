@@ -11,22 +11,21 @@
   <div class="arena-bg" aria-hidden="true"></div>
 
   <div class="game-shell">
-    <header class="hud">
-      <div class="level-badge" id="levelBadge">LEVEL 1: BASIC</div>
+  <header class="hud">
 
-      <div class="map-chip" aria-label="Map progress bar">
-        <div class="map-chip__track" aria-hidden="true">
-          <span class="map-chip__win map-chip__win--left"></span>
-          <span class="map-chip__win map-chip__win--right"></span>
-          <span class="map-chip__rail"></span>
-          <span class="map-chip__knot" id="miniKnot"></span>
-        </div>
+    <div class="map-chip" aria-label="Map progress bar">
+      <div class="map-chip__track" aria-hidden="true">
+        <span class="map-chip__win map-chip__win--left"></span>
+        <span class="map-chip__win map-chip__win--right"></span>
+        <span class="map-chip__rail"></span>
+        <span class="map-chip__knot" id="miniKnot"></span>
       </div>
+    </div>
 
-      <div class="scoreboard" id="scoreboard">BLUE 0 – RED 0</div>
-    </header>
+    <div class="scoreboard" id="scoreboard">BLUE 0 – RED 0</div>
+  </header>
 
-    <main class="game-layout">
+  <main class="game-layout">
       <section class="team-panel team-panel--blue" id="bluePanel" aria-label="Blue team player area">
         <div class="team-panel__header">
           <div class="team-badge team-badge--blue">
@@ -168,6 +167,34 @@
           </div>
         </div>
 
+        <!-- Mode selector -->
+        <div class="mode-bar" aria-label="Question mode selector">
+          <button class="mode-btn mode-btn--active" data-mode="mixed">
+            <svg class="mode-btn__icon" width="16" height="16" viewBox="0 0 16 16"><path d="M2 4h4v4H2V4zm8 0h4v4h-4V4zM2 10h4v4H2v-4zm8 0h4v4h-4v-4z" fill="currentColor"/></svg>
+            Mixed
+          </button>
+          <button class="mode-btn" data-mode="add">
+            <svg class="mode-btn__icon" width="16" height="16" viewBox="0 0 16 16"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            Add
+          </button>
+          <button class="mode-btn" data-mode="sub">
+            <svg class="mode-btn__icon" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8h12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            Sub
+          </button>
+          <button class="mode-btn" data-mode="mul">
+            <svg class="mode-btn__icon" width="16" height="16" viewBox="0 0 16 16"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            Mul
+          </button>
+          <button class="mode-btn" data-mode="div">
+            <svg class="mode-btn__icon" width="16" height="16" viewBox="0 0 16 16">
+              <circle cx="8" cy="3.5" r="1.5" fill="currentColor"/>
+              <path d="M2 8h12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="8" cy="12.5" r="1.5" fill="currentColor"/>
+            </svg>
+            Div
+          </button>
+        </div>
+
         <div class="stage-status" id="roundStatus">Ready</div>
       </section>
 
@@ -235,7 +262,6 @@
       </div>
       <div class="victory-card__title" id="victoryTitle">WINNER!</div>
       <div class="victory-card__team" id="victoryTeam">BLUE TEAM</div>
-      <div class="victory-card__subtitle" id="victorySubtitle">The knot crossed the win line.</div>
       <div class="victory-card__score" id="victoryScore"></div>
       <button class="victory-card__button" id="restartButton">&#9654; PLAY AGAIN</button>
     </div>

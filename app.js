@@ -1,5 +1,3 @@
-const LEVEL = 1;
-
 const TEAM_CONFIG = {
   blue: {
     label: "Blue",
@@ -23,14 +21,10 @@ const TEAM_CONFIG = {
   },
 };
 
-const OPERATION_POOL = {
-  basic: ["+", "-"],
-  intermediate: ["+", "-", "×", "÷"],
-  advanced: ["+", "-", "×", "÷"],
-};
+const OPERATION_POOL = ["+", "-", "×", "÷"];
 
 const state = {
-  level: LEVEL,
+  level: 1,
   ropeOffset: 0,
   maxOffset: 260,
   winOffset: 152,
@@ -42,6 +36,7 @@ const state = {
   },
   locked: false,
   victory: false,
+  mode: "mixed",
   teams: {
     blue: createTeamState("blue"),
     red: createTeamState("red"),
@@ -49,7 +44,7 @@ const state = {
 };
 
 const elements = {
-  levelBadge: document.getElementById("levelBadge"),
+  levelBadge: null,
   scoreboard: document.getElementById("scoreboard"),
   miniKnot: document.getElementById("miniKnot"),
   ropeKnot: document.getElementById("ropeKnot"),
@@ -71,12 +66,14 @@ function createTeamState(team) {
     input: "",
     question: null,
     questionText: "",
+    questionHistory: [],
   };
 }
 
 function init() {
   setupControls();
   setupRestart();
+  setupModeButtons();
   generateQuestion("blue");
   generateQuestion("red");
   renderAll();
@@ -95,6 +92,35 @@ function setupRestart() {
   elements.restartButton.addEventListener("pointerdown", handlePointerDown);
   elements.restartButton.addEventListener("click", restartRound);
 }
+
+function setupModeButtons() {
+  document.querySelectorAll(".mode-btn").forEach((button) => {
+    button.addEventListener("click", handleModeClick);
+  });
+}
+
+function handleModeClick(event) {
+  const mode = event.currentTarget.dataset.mode;
+  if (!mode) return;
+
+  state.mode = mode;
+
+  document.querySelectorAll(".mode-btn").forEach((btn) => btn.classList.remove("mode-btn--active"));
+  event.currentTarget.classList.add("mode-btn--active");
+
+  generateQuestion("blue");
+  generateQuestion("red");
+  renderAll();
+  updateRoundStatus(modeLabels[mode] || mode);
+}
+
+const modeLabels = {
+  mixed: "Mixed Mode",
+  add: "Addition",
+  sub: "Subtraction",
+  mul: "Multiplication",
+  div: "Division",
+};
 
 function handlePointerDown(event) {
   event.currentTarget.setPointerCapture?.(event.pointerId);
@@ -250,7 +276,6 @@ function endMatch(winner) {
   elements.victoryCard.className = `victory-card victory-card--${winner}`;
   elements.victoryTitle.textContent = "WINNER";
   elements.victoryTeam.textContent = winner === "blue" ? "BLUE TEAM" : "RED TEAM";
-  elements.victorySubtitle.textContent = "The knot crossed the win line.";
   elements.victoryScore.textContent = `BLUE ${state.score.blue} – RED ${state.score.red}`;
   elements.victoryOverlay.hidden = false;
   elements.victoryOverlay.setAttribute("aria-hidden", "false");
@@ -289,59 +314,79 @@ function disableInputs(disabled) {
 
 function generateQuestion(team) {
   const teamState = state.teams[team];
-  const levelBand = getLevelBand(state.level);
-  const operation = randomChoice(OPERATION_POOL[levelBand]);
-  const question = createQuestionByOperation(operation, levelBand);
+  const pool = resolveOperationPool();
+  const history = teamState.questionHistory;
+  const maxAttempts = 30;
+
+  let question = null;
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    const operation = randomChoice(pool);
+    question = createQuestionByOperation(operation);
+    const key = questionKey(question);
+    if (!history.includes(key)) {
+      break;
+    }
+    attempts++;
+  }
+
+  history.push(questionKey(question));
+  if (history.length > 12) {
+    history.shift();
+  }
 
   teamState.question = question;
   teamState.questionText = `${question.a} ${question.operator} ${question.b} = ?`;
 }
 
-function createQuestionByOperation(operation, levelBand) {
-  const range = getOperandRange(levelBand);
+function questionKey(q) {
+  return `${q.a}|${q.operator}|${q.b}`;
+}
+
+function resolveOperationPool() {
+  const mode = state.mode;
+  if (mode === "mixed") return OPERATION_POOL;
+  if (mode === "add") return ["+"];
+  if (mode === "sub") return ["-"];
+  if (mode === "mul") return ["×"];
+  if (mode === "div") return ["÷"];
+  return OPERATION_POOL;
+}
+
+function createQuestionByOperation(operation) {
+  const max = 10;
 
   if (operation === "+") {
-    const a = randomInt(1, range.max);
-    const b = randomInt(1, range.max);
+    const a = randomInt(1, max);
+    const b = randomInt(1, max);
     return { a, b, operator: "+", answer: a + b };
   }
 
   if (operation === "-") {
-    const a = randomInt(2, range.max);
+    const a = randomInt(2, max);
     const b = randomInt(1, a - 1);
     return { a, b, operator: "-", answer: a - b };
   }
 
   if (operation === "×") {
-    const a = randomInt(1, range.max);
-    const b = randomInt(1, range.max);
+    const a = randomInt(1, max);
+    const b = randomInt(1, max);
     return { a, b, operator: "×", answer: a * b };
   }
 
-  return createDivisionQuestion(range.max);
+  return createDivisionQuestion(max);
 }
 
-function createDivisionQuestion(maxOperand) {
-  const divisor = randomInt(1, maxOperand);
-  const quotient = randomInt(1, maxOperand);
+function createDivisionQuestion(max) {
+  const divisor = randomInt(1, max);
+  const quotient = randomInt(1, max);
   return {
     a: divisor * quotient,
     b: divisor,
     operator: "÷",
     answer: quotient,
   };
-}
-
-function getLevelBand(level) {
-  if (level <= 5) return "basic";
-  if (level <= 9) return "intermediate";
-  return "advanced";
-}
-
-function getOperandRange(levelBand) {
-  if (levelBand === "basic") return { min: 1, max: 10 };
-  if (levelBand === "intermediate") return { min: 1, max: 20 };
-  return { min: 1, max: 50 };
 }
 
 function randomChoice(items) {
@@ -356,7 +401,6 @@ function renderAll() {
   renderTeam("blue");
   renderTeam("red");
   updateScoreboard();
-  updateLevelBadge();
   animateRope();
 }
 
@@ -378,17 +422,6 @@ function renderTeam(team) {
 
 function updateScoreboard() {
   elements.scoreboard.textContent = `BLUE ${state.score.blue} – RED ${state.score.red}`;
-}
-
-function updateLevelBadge() {
-  const levelName = getLevelName(state.level);
-  elements.levelBadge.textContent = `LEVEL ${state.level}: ${levelName}`;
-}
-
-function getLevelName(level) {
-  if (level <= 5) return "BASIC";
-  if (level <= 9) return "INTERMEDIATE";
-  return "ADVANCED";
 }
 
 function updateRoundStatus(text) {

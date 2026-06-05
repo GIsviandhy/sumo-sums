@@ -87,7 +87,7 @@ button:focus-visible {
   overflow: hidden;
   padding: 6px;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   gap: 6px;
 }
 
@@ -99,7 +99,55 @@ button:focus-visible {
   gap: 6px;
 }
 
-.map-chip,
+/* ── Mode selector ── */
+.mode-bar {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 6px;
+}
+
+.mode-btn {
+  padding: 6px 14px;
+  min-height: 34px;
+  font-family: var(--font-ui);
+  font-size: clamp(10px, 0.85vw, 13px);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  background: #fefefe;
+  color: var(--ink);
+  border: 3px solid var(--outline);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 0 var(--outline);
+  transition: transform 100ms ease, box-shadow 100ms ease, filter 100ms ease;
+  touch-action: manipulation;
+}
+
+.mode-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--outline);
+}
+
+.mode-btn--active {
+  background: var(--win);
+  color: #1a1200;
+  border-color: #8a6a00;
+  box-shadow: 0 4px 0 #8a6a00;
+}
+
+.mode-btn--active:active {
+  box-shadow: 0 1px 0 #8a6a00;
+}
+
+.mode-btn__icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
 .question-card,
 .numpad,
 .team-badge,
@@ -107,12 +155,19 @@ button:focus-visible {
 .stage-status {
   border: 5px solid var(--outline);
   border-radius: var(--radius-lg);
-  box-shadow: 0 8px 0 var(--outline);
+  box-shadow: 0 3px 0 var(--outline);
 }
 
-/* Compact dark pill badges — level (left) and score (right) */
-.level-badge,
+/* Places the map pill in the middle column and centers it */
+.map-chip {
+  grid-column: 2;
+  justify-self: center;
+}
+
 .scoreboard {
+  /* Places the points pill in the right column and aligns it to the right edge */
+  grid-column: 3;
+  justify-self: end; 
   display: inline-flex;
   align-items: center;
   padding: 6px 12px;
@@ -128,10 +183,6 @@ button:focus-visible {
   border: 2px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
   box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
-}
-
-.level-badge {
-  justify-self: start;
 }
 
 .scoreboard {
@@ -230,7 +281,7 @@ button:focus-visible {
   align-content: start;
   border: 4px solid var(--outline);
   border-radius: var(--radius-xl);
-  box-shadow: 0 6px 0 var(--outline);
+  box-shadow: 0 2px 0 var(--outline);
   overflow: hidden;
 }
 
@@ -240,6 +291,11 @@ button:focus-visible {
 
 .team-panel--red {
   background: linear-gradient(180deg, #cc1a1a, #8a0f0f);
+}
+
+.question-card {
+  position: relative;
+  z-index: 1;
 }
 
 .team-panel__header {
@@ -451,58 +507,37 @@ button:focus-visible {
 }
 
 /* Crowd = two rows of repeating ellipse "heads" over a dark team-color band */
+/* Crowd = dua rows of repeating ellipse "heads" over a dark team-color band */
 .arena-crowd--left {
   left: 0;
-  background:
-    /* front row heads */
-    radial-gradient(ellipse 13px 11px at 13px 100%, #0d2a6e 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 39px 100%, #0d2a6e 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 65px 100%, #0d2a6e 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 91px 100%, #0d2a6e 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 117px 100%, #0d2a6e 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 143px 100%, #0d2a6e 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 169px 100%, #0d2a6e 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 195px 100%, #0d2a6e 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 221px 100%, #0d2a6e 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 247px 100%, #0d2a6e 50%, transparent 51%),
-    /* back row heads (offset, slightly smaller) */
-    radial-gradient(ellipse 11px 9px at 26px 72%, #0a1f52 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 52px 72%, #0a1f52 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 78px 72%, #0a1f52 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 104px 72%, #0a1f52 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 130px 72%, #0a1f52 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 156px 72%, #0a1f52 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 182px 72%, #0a1f52 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 208px 72%, #0a1f52 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 234px 72%, #0a1f52 50%, transparent 51%),
+  background-image: 
+    /* Baris Depan: Lebih cerah & penuh */
+    radial-gradient(ellipse 65% 70% at 50% 100%, #2254c7 60%, transparent 62%),
+    /* Baris Belakang: Digeser 50% (10px) agar mengisi celah, posisi lebih naik, warna lebih gelap */
+    radial-gradient(ellipse 60% 70% at 50% 80%, #133380 60%, transparent 62%),
+    /* Lapisan dasar stadion */
     linear-gradient(180deg, #071540 0%, #0d2a6e 100%);
+  
+  /* Menentukan lebar tiap kepala (20px) */
+  background-size: 20px 100%, 20px 100%, 100% 100%;
+  /* Baris belakang digeser 10px secara horizontal agar posisinya zig-zag pas di sela-sela */
+  background-position: 0px 0px, 10px 0px, 0px 0px;
+  background-repeat: repeat-x, repeat-x, no-repeat;
 }
 
 .arena-crowd--right {
   right: 0;
-  background:
-    /* front row heads */
-    radial-gradient(ellipse 13px 11px at 13px 100%, #6e0d0d 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 39px 100%, #6e0d0d 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 65px 100%, #6e0d0d 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 91px 100%, #6e0d0d 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 117px 100%, #6e0d0d 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 143px 100%, #6e0d0d 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 169px 100%, #6e0d0d 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 195px 100%, #6e0d0d 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 221px 100%, #6e0d0d 50%, transparent 51%),
-    radial-gradient(ellipse 13px 11px at 247px 100%, #6e0d0d 50%, transparent 51%),
-    /* back row heads */
-    radial-gradient(ellipse 11px 9px at 26px 72%, #520a0a 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 52px 72%, #520a0a 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 78px 72%, #520a0a 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 104px 72%, #520a0a 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 130px 72%, #520a0a 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 156px 72%, #520a0a 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 182px 72%, #520a0a 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 208px 72%, #520a0a 50%, transparent 51%),
-    radial-gradient(ellipse 11px 9px at 234px 72%, #520a0a 50%, transparent 51%),
+  background-image: 
+    /* Baris Depan */
+    radial-gradient(ellipse 65% 70% at 50% 100%, #ad1818 60%, transparent 62%),
+    /* Baris Belakang */
+    radial-gradient(ellipse 60% 70% at 50% 80%, #630c0c 60%, transparent 62%),
+    /* Lapisan dasar stadion */
     linear-gradient(180deg, #400707 0%, #6e0d0d 100%);
+  
+  background-size: 20px 100%, 20px 100%, 100% 100%;
+  background-position: 0px 0px, 10px 0px, 0px 0px;
+  background-repeat: repeat-x, repeat-x, no-repeat;
 }
 
 .win-line {
@@ -602,9 +637,23 @@ button:focus-visible {
   padding: 18px;
   background: rgba(6, 10, 18, 0.78);
   backdrop-filter: blur(4px);
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.98);
+  transition: opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
 }
 
-.overlay[hidden],
+.overlay:not([hidden]) {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+.overlay[hidden] {
+  display: grid !important;
+  pointer-events: none;
+}
+
 .confetti-layer[hidden] {
   display: none !important;
 }
@@ -846,27 +895,148 @@ button:focus-visible {
 }
 
 @media (max-width: 740px) {
-  .hud {
-    grid-template-columns: 1fr;
+  :root {
+    --panel-width: minmax(130px, 170px);
+    --center-width: minmax(180px, 1fr);
+    --avatar-size: clamp(38px, 4.5vw, 56px);
+    --arena-height: min(28vh, 220px);
+    --topbar-height: 44px;
   }
 
-  .level-badge,
-  .scoreboard,
-  .map-chip {
-    justify-self: stretch;
+  .hud {
+    grid-template-columns: 1fr minmax(120px, 240px) 1fr;
+    gap: 4px;
   }
 
   .scoreboard {
-    white-space: normal;
+    font-size: clamp(8px, 0.75vw, 10px);
+    padding: 4px 8px;
   }
 
   .game-layout {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
+    gap: 4px;
+  }
+
+  .team-panel {
+    padding: 4px;
+    gap: 3px;
+    border-width: 3px;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 2px 0 var(--outline);
+  }
+
+  .team-badge {
+    font-size: clamp(8px, 1vw, 11px);
+    padding: 4px 6px;
+    border-width: 3px;
+  }
+
+  .question-card {
+    padding: 4px 6px;
+    border-width: 3px;
+    box-shadow: 0 4px 0 var(--outline);
+  }
+
+  .question-card__label {
+    font-size: 8px;
+  }
+
+  .question-card__math {
+    height: 38px;
+    font-size: clamp(0.85rem, 1.4vw, 1.2rem);
+  }
+
+  .question-card__helper {
+    font-size: 8px;
+  }
+
+  .answer-display {
+    min-height: 32px;
+    font-size: clamp(0.9rem, 1.3vw, 1.2rem);
+    border-width: 2px;
+    padding: 2px 6px;
+  }
+
+  .numpad {
+    gap: 3px;
+  }
+
+  .key {
+    min-height: 28px;
+    font-size: clamp(0.7rem, 1vw, 0.9rem);
+    border-width: 2px;
+    border-radius: 7px;
+    box-shadow: 0 3px 0 var(--outline);
+  }
+
+  .key:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--outline);
+  }
+
+  .rope {
+    width: min(62vw, 400px);
+  }
+
+  .rope__knot {
+    width: 24px;
+    height: 24px;
+    border-width: 4px;
+    box-shadow: 0 3px 0 var(--outline);
+  }
+
+  .sumo-svg {
+    width: 80px;
+    height: 133px;
+  }
+
+  .stage-status {
+    font-size: 9px;
+    padding: 3px 8px;
+  }
+
+  .mode-btn {
+    padding: 4px 10px;
+    min-height: 28px;
+    font-size: clamp(8px, 0.7vw, 10px);
+    border-width: 2px;
+    border-radius: 10px;
+    box-shadow: 0 3px 0 var(--outline);
+  }
+
+  .mode-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--outline);
+  }
+
+  .mode-btn__icon {
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
   }
 
   .center-stage {
-    min-height: 360px;
+    min-height: 200px;
+  }
+
+  .map-chip__track {
+    height: 16px;
+  }
+
+  .map-chip__knot {
+    width: 16px;
+    height: 16px;
+  }
+
+  .victory-card {
+    padding: 14px 10px;
+  }
+
+  .victory-card__button {
+    width: calc(100% - 32px);
+    margin: 0 16px 16px;
+    min-height: 42px;
+    font-size: 1rem;
   }
 }
 
