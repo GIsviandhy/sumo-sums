@@ -37,11 +37,15 @@ const state = {
   locked: false,
   victory: false,
   mode: "mixed",
+  // Serializes match-altering actions (submits) so two simultaneous taps don’t interleave state updates.
+  actionQueue: [],
+  processingAction: false,
   teams: {
     blue: createTeamState("blue"),
     red: createTeamState("red"),
   },
 };
+
 
 const elements = {
   levelBadge: null,
@@ -92,6 +96,7 @@ function setupControls() {
 
   document.addEventListener("keydown", handleKeyboardInput);
 }
+
 
 function setupRestart() {
   elements.restartButton.addEventListener("pointerdown", handlePointerDown);
@@ -218,20 +223,44 @@ function clearInput(team) {
   renderTeam(team);
 }
 
-function submitAnswer(team) {
-  const teamState = state.teams[team];
-  if (!teamState.question) return;
+function enqueueAction(fn) {
+  state.actionQueue.push(fn);
+  if (state.processingAction) return;
 
-  const expected = String(teamState.question.answer);
-  const guess = teamState.input || "";
-
-  if (guess === expected) {
-    handleCorrectAnswer(team);
-    return;
+  state.processingAction = true;
+  // Drain synchronously to preserve order for simultaneous taps.
+  while (state.actionQueue.length > 0) {
+    const next = state.actionQueue.shift();
+    try {
+      next();
+    } catch (err) {
+      // Don’t permanently break the queue.
+      // eslint-disable-next-line no-console
+      console.error(err);
+    }
   }
-
-  handleIncorrectAnswer(team);
+  state.processingAction = false;
 }
+
+function submitAnswer(team) {
+  // Only serialize match-altering actions.
+  enqueueAction(() => {
+    const teamState = state.teams[team];
+    if (!teamState.question) return;
+    if (state.victory) return;
+
+    const expected = String(teamState.question.answer);
+    const guess = teamState.input || "";
+
+    if (guess === expected) {
+      handleCorrectAnswer(team);
+      return;
+    }
+
+    handleIncorrectAnswer(team);
+  });
+}
+
 
 function handleCorrectAnswer(team) {
   if (state.victory) return;
