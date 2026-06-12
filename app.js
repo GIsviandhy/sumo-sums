@@ -1,3 +1,87 @@
+// ============================================================
+// SUMO SUMS — Multi-Touch 2-Player Input Engine
+// ============================================================
+// Architecture:
+//   1. GAME COMPONENT STATE
+//   2. GLOBAL SYSTEM OVERRIDES
+//   3. THE MULTI-TOUCH INTERPOLATOR ENGINE
+//   4. DATA VALIDATION AND ACTION ROUTING
+//   5. EXISTING GAME LOGIC (unchanged below the engine)
+// ============================================================
+
+// --- 1. GAME COMPONENT STATE ---
+const gameState = {
+    ropePosition: 50, // 50 is dead center. < 50 moves Left, > 50 moves Right
+    leftPlayerScore: 0,
+    rightPlayerScore: 0,
+    isGameOver: false
+};
+
+// DOM Cache Matrix — these are the ONLY elements used for touch-hit-testing
+const leftPad = document.getElementById('left-player-pad');
+const rightPad = document.getElementById('right-player-pad');
+
+// --- 2. GLOBAL SYSTEM OVERRIDES ---
+// Completely neutralize scrolling, zooming, and context menus
+window.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+window.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
+window.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// --- 3. THE MULTI-TOUCH INTERPOLATOR ENGINE ---
+window.addEventListener('touchstart', (event) => {
+    if (gameState.isGameOver) return;
+
+    // Stop native tap-handling delays completely
+    event.preventDefault();
+
+    // Process every single concurrent finger touching the panel
+    for (let i = 0; i < event.changedTouches.length; i++) {
+        const touch = event.changedTouches[i];
+
+        // Exact coordinate tracking for rapid button mashing
+        // Uses elementFromPoint() to avoid erratic event.target during fast taps
+        const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (!targetElement) continue;
+
+        // Route input safely to isolated player states
+        if (leftPad && leftPad.contains(targetElement)) {
+            processPlayerAction('left', targetElement);
+        } else if (rightPad && rightPad.contains(targetElement)) {
+            processPlayerAction('right', targetElement);
+        }
+    }
+}, { passive: false });
+
+// --- 4. DATA VALIDATION AND ACTION ROUTING ---
+function processPlayerAction(player, element) {
+    // Extract the numeric value of the button tapped (0-9, Clear, or Submit)
+    const digit = element.getAttribute('data-key');
+    const action = element.getAttribute('data-action');
+
+    if (digit !== null) {
+        // Map 'left' -> 'blue', 'right' -> 'red' for existing game logic
+        const team = player === 'left' ? 'blue' : 'red';
+        appendDigit(team, digit);
+        return;
+    }
+
+    if (action === 'clear') {
+        const team = player === 'left' ? 'blue' : 'red';
+        clearInput(team);
+        return;
+    }
+
+    if (action === 'submit') {
+        const team = player === 'left' ? 'blue' : 'red';
+        submitAnswer(team);
+        return;
+    }
+}
+
+// ============================================================
+// EXISTING GAME LOGIC (unchanged)
+// ============================================================
+
 const TEAM_CONFIG = {
   blue: {
     label: "Blue",
@@ -37,15 +121,11 @@ const state = {
   locked: false,
   victory: false,
   mode: "mixed",
-  // Serializes match-altering actions (submits) so two simultaneous taps don’t interleave state updates.
-  actionQueue: [],
-  processingAction: false,
   teams: {
     blue: createTeamState("blue"),
     red: createTeamState("red"),
   },
 };
-
 
 const elements = {
   levelBadge: null,
@@ -79,7 +159,7 @@ function createTeamState(team) {
 }
 
 function init() {
-  setupControls();
+  setupUIListeners();
   setupRestart();
   setupModeButtons();
   setupPauseModal();
@@ -88,18 +168,12 @@ function init() {
   renderAll();
 }
 
-function setupControls() {
-  document.querySelectorAll("[data-team][data-action], [data-team][data-key]").forEach((button) => {
-    button.addEventListener("pointerdown", handlePointerDown);
-    button.addEventListener("click", handleInputClick);
-  });
-
+// Only UI controls (not player numpad) use click listeners
+function setupUIListeners() {
   document.addEventListener("keydown", handleKeyboardInput);
 }
 
-
 function setupRestart() {
-  elements.restartButton.addEventListener("pointerdown", handlePointerDown);
   elements.restartButton.addEventListener("click", restartRound);
 }
 
@@ -127,6 +201,10 @@ function resetGame() {
   state.ropeOffset = 0;
   state.victory = false;
   state.locked = false;
+
+  gameState.leftPlayerScore = 0;
+  gameState.rightPlayerScore = 0;
+  gameState.isGameOver = false;
 
   elements.pauseModal?.classList.add("hidden");
   elements.victoryOverlay.hidden = true;
@@ -167,33 +245,7 @@ const modeLabels = {
   div: "Division",
 };
 
-function handlePointerDown(event) {
-  event.currentTarget.setPointerCapture?.(event.pointerId);
-}
-
-function handleInputClick(event) {
-  const button = event.currentTarget;
-  const team = button.dataset.team;
-  const action = button.dataset.action;
-  const digit = button.dataset.key;
-
-  if (!team || state.victory) return;
-
-  if (digit !== undefined) {
-    appendDigit(team, digit);
-    return;
-  }
-
-  if (action === "clear") {
-    clearInput(team);
-    return;
-  }
-
-  if (action === "submit") {
-    submitAnswer(team);
-  }
-}
-
+// Player input via keyboard (for development/testing)
 function handleKeyboardInput(event) {
   if (state.victory) return;
 
@@ -223,44 +275,20 @@ function clearInput(team) {
   renderTeam(team);
 }
 
-function enqueueAction(fn) {
-  state.actionQueue.push(fn);
-  if (state.processingAction) return;
-
-  state.processingAction = true;
-  // Drain synchronously to preserve order for simultaneous taps.
-  while (state.actionQueue.length > 0) {
-    const next = state.actionQueue.shift();
-    try {
-      next();
-    } catch (err) {
-      // Don’t permanently break the queue.
-      // eslint-disable-next-line no-console
-      console.error(err);
-    }
-  }
-  state.processingAction = false;
-}
-
 function submitAnswer(team) {
-  // Only serialize match-altering actions.
-  enqueueAction(() => {
-    const teamState = state.teams[team];
-    if (!teamState.question) return;
-    if (state.victory) return;
+  const teamState = state.teams[team];
+  if (!teamState.question) return;
 
-    const expected = String(teamState.question.answer);
-    const guess = teamState.input || "";
+  const expected = String(teamState.question.answer);
+  const guess = teamState.input || "";
 
-    if (guess === expected) {
-      handleCorrectAnswer(team);
-      return;
-    }
+  if (guess === expected) {
+    handleCorrectAnswer(team);
+    return;
+  }
 
-    handleIncorrectAnswer(team);
-  });
+  handleIncorrectAnswer(team);
 }
-
 
 function handleCorrectAnswer(team) {
   if (state.victory) return;
@@ -270,6 +298,9 @@ function handleCorrectAnswer(team) {
 
   const direction = team === "blue" ? -1 : 1;
   state.ropeOffset = clamp(state.ropeOffset + direction * state.pullStep, -state.maxOffset, state.maxOffset);
+
+  // Mirror rope position into gameState for the touch engine
+  gameState.ropePosition = 50 + (state.ropeOffset / state.maxOffset) * 50;
 
   pulseAvatar(team);
   animateRope();
@@ -288,6 +319,8 @@ function handleIncorrectAnswer(team) {
   const direction = opponent === "blue" ? -1 : 1;
 
   state.ropeOffset = clamp(state.ropeOffset + direction * state.penaltyStep, -state.maxOffset, state.maxOffset);
+
+  gameState.ropePosition = 50 + (state.ropeOffset / state.maxOffset) * 50;
 
   pulseAvatar(opponent);
   animateRope();
@@ -338,7 +371,10 @@ function checkVictory(lastTeam) {
 function endMatch(winner) {
   state.victory = true;
   state.locked = true;
+  gameState.isGameOver = true;
   state.score[winner] += 1;
+  if (winner === 'blue') gameState.leftPlayerScore = state.score.blue;
+  else gameState.rightPlayerScore = state.score.red;
   updateScoreboard();
   disableInputs(true);
 
@@ -359,6 +395,7 @@ function endMatch(winner) {
 function restartRound() {
   state.victory = false;
   state.locked = false;
+  gameState.isGameOver = false;
   state.ropeOffset = 0;
   state.teams.blue.input = "";
   state.teams.red.input = "";

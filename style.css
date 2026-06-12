@@ -49,6 +49,13 @@ body {
   user-select: none;
 }
 
+button, .keypad-tile, .player-zone, #game-viewport {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 button {
   font: inherit;
   cursor: pointer;
