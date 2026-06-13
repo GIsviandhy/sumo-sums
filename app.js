@@ -24,31 +24,52 @@ const rightPad = document.getElementById('right-player-pad');
 // --- 2. GLOBAL SYSTEM OVERRIDES ---
 // Completely neutralize scrolling, zooming, and context menus
 window.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
-window.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
+// window.addEventListener('touchend', (e) => e.preventDefault(), { passive: false });
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 // --- 3. THE MULTI-TOUCH INTERPOLATOR ENGINE ---
+// window.addEventListener('touchstart', (event) => {
+//     if (gameState.isGameOver) return;
+
+//     // Stop native tap-handling delays completely
+//     event.preventDefault();
+
+//     // Process every single concurrent finger touching the panel
+//     for (let i = 0; i < event.changedTouches.length; i++) {
+//         const touch = event.changedTouches[i];
+
+//         // Exact coordinate tracking for rapid button mashing
+//         // Uses elementFromPoint() to avoid erratic event.target during fast taps
+//         const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+//         if (!targetElement) continue;
+
+//         // Route input safely to isolated player states
+//         if (leftPad && leftPad.contains(targetElement)) {
+//             processPlayerAction('left', targetElement);
+//         } else if (rightPad && rightPad.contains(targetElement)) {
+//             processPlayerAction('right', targetElement);
+//         }
+//     }
+// }, { passive: false });
 window.addEventListener('touchstart', (event) => {
-    if (gameState.isGameOver) return;
-
-    // Stop native tap-handling delays completely
-    event.preventDefault();
-
-    // Process every single concurrent finger touching the panel
+    // Process concurrent fingers
     for (let i = 0; i < event.changedTouches.length; i++) {
         const touch = event.changedTouches[i];
-
-        // Exact coordinate tracking for rapid button mashing
-        // Uses elementFromPoint() to avoid erratic event.target during fast taps
         const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
         if (!targetElement) continue;
 
-        // Route input safely to isolated player states
-        if (leftPad && leftPad.contains(targetElement)) {
-            processPlayerAction('left', targetElement);
-        } else if (rightPad && rightPad.contains(targetElement)) {
-            processPlayerAction('right', targetElement);
+        // ONLY prevent default behavior if tapping inside the math pads
+        if (leftPad.contains(targetElement) || rightPad.contains(targetElement)) {
+            event.preventDefault(); // Stops zooming/double-tap delays for the game
+            
+            if (leftPad.contains(targetElement)) {
+                processPlayerAction('left', targetElement);
+            } else {
+                processPlayerAction('right', targetElement);
+            }
         }
+        // If they tap outside the pads (menus/buttons), do NOT call preventDefault().
+        // This allows normal smartboard/tablet touch-clicks to work perfectly!
     }
 }, { passive: false });
 
