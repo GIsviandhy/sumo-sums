@@ -393,7 +393,8 @@ function endMatch(winner) {
 
   const loser = winner === "blue" ? "red" : "blue";
 
-  // FIX #3: Add win/lose states on avatars
+  // FIX #1: Trigger avatar animation FIRST before overlay appears.
+  // Use a 700ms delay so the animation plays visibly before the overlay covers it.
   const winningAvatar = document.getElementById(TEAM_CONFIG[winner].avatarId);
   winningAvatar?.classList.add("is-winning");
 
@@ -404,11 +405,16 @@ function endMatch(winner) {
   elements.victoryTitle.textContent = "WINNER";
   elements.victoryTeam.textContent = winner === "blue" ? "BLUE TEAM" : "RED TEAM";
   elements.victoryScore.textContent = `BLUE ${state.score.blue} – RED ${state.score.red}`;
-  elements.victoryOverlay.hidden = false;
-  elements.victoryOverlay.setAttribute("aria-hidden", "false");
 
   playVictoryFanfare();
-  createConfetti(winner);
+
+  // Delay overlay + confetti to let avatar animation play first
+  window.setTimeout(() => {
+    elements.victoryOverlay.hidden = false;
+    elements.victoryOverlay.setAttribute("aria-hidden", "false");
+    elements.confettiLayer.innerHTML = "";
+    createConfetti(winner);
+  }, 700);
 }
 
 function restartRound() {

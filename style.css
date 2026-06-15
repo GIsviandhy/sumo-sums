@@ -90,6 +90,7 @@ button:focus-visible {
 .game-shell {
   position: relative;
   width: 100%;
+  min-width: 700px;
   height: 100vh;
   overflow: hidden;
   padding: 6px;
@@ -1225,26 +1226,24 @@ button:focus-visible {
   }
 }
 
+/* ── Scrollable viewport wrapper for layouts that exceed the viewport ── */
+@media (max-width: 699px) {
+  html, body {
+    overflow-x: auto;
+  }
+}
+
 .touch-hint {
   position: fixed;
   bottom: 4px;
   right: 8px;
   font-size: 9px;
   font-weight: 700;
-  color: rgb(255, 255, 243);
+  color: rgba(255, 255, 255, 0.25);
   letter-spacing: 0.06em;
   pointer-events: none;
   z-index: 1;
   user-select: none;
-}
-
-/* ── Responsiveness fallback: keep layout intact on very small viewports ── */
-@media (max-width: 520px) {
-  .game-shell {
-    min-width: 520px;
-    min-height: 100vh;
-    overflow-x: auto;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
