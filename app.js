@@ -414,7 +414,7 @@ function endMatch(winner) {
     elements.victoryOverlay.setAttribute("aria-hidden", "false");
     elements.confettiLayer.innerHTML = "";
     createConfetti(winner);
-  }, 700);
+  }, 300);
 }
 
 function restartRound() {
