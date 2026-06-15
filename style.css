@@ -891,6 +891,10 @@ button:focus-visible {
   animation: victory-hop 700ms ease-in-out infinite;
 }
 
+.sumo-svg.is-losing {
+  animation: loser-cry 1.6s ease-in-out infinite;
+}
+
 @keyframes sumo-sway {
   0%,
   100% {
@@ -954,6 +958,29 @@ button:focus-visible {
   100% {
     opacity: 0;
     transform: translate3d(var(--drift, 0px), 105vh, 0) rotate(540deg);
+  }
+}
+
+@keyframes loser-cry {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scaleX(1);
+    filter: brightness(1) saturate(0.7);
+  }
+  20% {
+    transform: translateY(-4px) rotate(-3deg) scaleX(0.92);
+    filter: brightness(0.75) saturate(0.5) hue-rotate(-10deg);
+  }
+  40% {
+    transform: translateY(2px) rotate(1deg) scaleX(0.96);
+    filter: brightness(0.8) saturate(0.55);
+  }
+  60% {
+    transform: translateY(-2px) rotate(-1deg) scaleX(0.94);
+    filter: brightness(0.72) saturate(0.48) hue-rotate(-5deg);
+  }
+  80% {
+    transform: translateY(1px) rotate(2deg) scaleX(0.98);
+    filter: brightness(0.78) saturate(0.52);
   }
 }
 
@@ -1195,6 +1222,28 @@ button:focus-visible {
 
   .victory-card {
     padding: 18px 14px;
+  }
+}
+
+.touch-hint {
+  position: fixed;
+  bottom: 4px;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  color: rgb(255, 255, 243);
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  z-index: 1;
+  user-select: none;
+}
+
+/* ── Responsiveness fallback: keep layout intact on very small viewports ── */
+@media (max-width: 520px) {
+  .game-shell {
+    min-width: 520px;
+    min-height: 100vh;
+    overflow-x: auto;
   }
 }
 

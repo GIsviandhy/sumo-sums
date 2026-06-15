@@ -1,17 +1,7 @@
-// ============================================================
-// SUMO SUMS — Multi-Touch 2-Player Input Engine
-// ============================================================
-// Architecture:
-//   1. GAME COMPONENT STATE
-//   2. GLOBAL SYSTEM OVERRIDES
-//   3. THE MULTI-TOUCH INTERPOLATOR ENGINE
-//   4. DATA VALIDATION AND ACTION ROUTING
-//   5. EXISTING GAME LOGIC (unchanged below the engine)
-// ============================================================
-
 // --- 1. GAME COMPONENT STATE ---
+// ropeOffset is the SINGLE source of truth for rope position.
+// > 0 = Red side winning, < 0 = Blue side winning.
 const gameState = {
-    ropePosition: 50, // 50 is dead center. < 50 moves Left, > 50 moves Right
     leftPlayerScore: 0,
     rightPlayerScore: 0,
     isGameOver: false
@@ -28,30 +18,10 @@ window.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false
 window.addEventListener('contextmenu', (e) => e.preventDefault());
 
 // --- 3. THE MULTI-TOUCH INTERPOLATOR ENGINE ---
-// window.addEventListener('touchstart', (event) => {
-//     if (gameState.isGameOver) return;
-
-//     // Stop native tap-handling delays completely
-//     event.preventDefault();
-
-//     // Process every single concurrent finger touching the panel
-//     for (let i = 0; i < event.changedTouches.length; i++) {
-//         const touch = event.changedTouches[i];
-
-//         // Exact coordinate tracking for rapid button mashing
-//         // Uses elementFromPoint() to avoid erratic event.target during fast taps
-//         const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-//         if (!targetElement) continue;
-
-//         // Route input safely to isolated player states
-//         if (leftPad && leftPad.contains(targetElement)) {
-//             processPlayerAction('left', targetElement);
-//         } else if (rightPad && rightPad.contains(targetElement)) {
-//             processPlayerAction('right', targetElement);
-//         }
-//     }
-// }, { passive: false });
 window.addEventListener('touchstart', (event) => {
+    // FIX #5: Guard against input after game over or when locked
+    if (gameState.isGameOver || state.victory || state.locked) return;
+
     // Process concurrent fingers
     for (let i = 0; i < event.changedTouches.length; i++) {
         const touch = event.changedTouches[i];
@@ -69,9 +39,24 @@ window.addEventListener('touchstart', (event) => {
             }
         }
         // If they tap outside the pads (menus/buttons), do NOT call preventDefault().
-        // This allows normal smartboard/tablet touch-clicks to work perfectly!
+        // allows normal smartboard/tablet touch-clicks to work
     }
 }, { passive: false });
+
+// FIX #2: Add click/mousedown handlers so calculators work with mouse clicks too
+function setupClickHandlers() {
+    document.querySelectorAll('.key').forEach((key) => {
+        key.addEventListener('click', handleKeyClick);
+    });
+}
+
+function handleKeyClick(event) {
+    if (gameState.isGameOver || state.victory || state.locked) return;
+    const element = event.currentTarget;
+    const team = element.getAttribute('data-team');
+    if (!team) return;
+    processPlayerAction(team === 'blue' ? 'left' : 'right', element);
+}
 
 // --- 4. DATA VALIDATION AND ACTION ROUTING ---
 function processPlayerAction(player, element) {
@@ -100,7 +85,7 @@ function processPlayerAction(player, element) {
 }
 
 // ============================================================
-// EXISTING GAME LOGIC (unchanged)
+// GAME LOGIC
 // ============================================================
 
 const TEAM_CONFIG = {
@@ -130,6 +115,8 @@ const OPERATION_POOL = ["+", "-", "×", "÷"];
 
 const state = {
   level: 1,
+  // SINGLE source of truth for rope position. 0 = center.
+  // Negative = Blue side winning, Positive = Red side winning.
   ropeOffset: 0,
   maxOffset: 260,
   winOffset: 152,
@@ -182,6 +169,7 @@ function createTeamState(team) {
 function init() {
   setupUIListeners();
   setupRestart();
+  setupClickHandlers(); // FIX #2: Setup click handlers for mouse users
   setupModeButtons();
   setupPauseModal();
   generateQuestion("blue");
@@ -232,8 +220,10 @@ function resetGame() {
   elements.victoryOverlay.setAttribute("aria-hidden", "true");
   elements.confettiLayer.innerHTML = "";
 
+  disableInputs(false);
+
   document.querySelectorAll(".sumo-svg").forEach((avatar) => {
-    avatar.classList.remove("is-winning", "is-pulling-blue", "is-pulling-red");
+    avatar.classList.remove("is-winning", "is-pulling-blue", "is-pulling-red", "is-losing");
   });
 
   generateQuestion("blue");
@@ -268,7 +258,7 @@ const modeLabels = {
 
 // Player input via keyboard (for development/testing)
 function handleKeyboardInput(event) {
-  if (state.victory) return;
+  if (state.victory || state.locked || gameState.isGameOver) return;
 
   if (/^[0-9]$/.test(event.key)) {
     appendDigit("blue", event.key);
@@ -320,16 +310,14 @@ function handleCorrectAnswer(team) {
   const direction = team === "blue" ? -1 : 1;
   state.ropeOffset = clamp(state.ropeOffset + direction * state.pullStep, -state.maxOffset, state.maxOffset);
 
-  // Mirror rope position into gameState for the touch engine
-  gameState.ropePosition = 50 + (state.ropeOffset / state.maxOffset) * 50;
-
   pulseAvatar(team);
   animateRope();
   updateRoundStatus(`${TEAM_CONFIG[team].label} correct`);
 
   state.teams[team].input = "";
-  generateQuestion(team);
-  renderAll();
+
+  // FIX #1: Check victory BEFORE generating new question and rendering
+  // checkVictory will call generateQuestion for the opponent if no win
   checkVictory(team);
 }
 
@@ -341,13 +329,15 @@ function handleIncorrectAnswer(team) {
 
   state.ropeOffset = clamp(state.ropeOffset + direction * state.penaltyStep, -state.maxOffset, state.maxOffset);
 
-  gameState.ropePosition = 50 + (state.ropeOffset / state.maxOffset) * 50;
-
   pulseAvatar(opponent);
   animateRope();
   updateRoundStatus(`${TEAM_CONFIG[team].label} missed`);
+
   state.teams[team].input = "";
-  renderAll();
+
+  // FIX #1: Call checkVictory on incorrect answers too — if B's wrong answer
+  // pushes the rope past A's win-line, victory must be declared.
+  checkVictory(team);
 }
 
 function pulseAvatar(team) {
@@ -384,9 +374,11 @@ function checkVictory(lastTeam) {
     return;
   }
 
-  const opponent = lastTeam === "blue" ? "red" : "blue";
+  // No victory — regenerate question for the team that just answered
+  // (so the next player gets a fresh question)
+  generateQuestion(lastTeam);
   updateScoreboard();
-  renderTeam(opponent);
+  renderAll();
 }
 
 function endMatch(winner) {
@@ -399,15 +391,21 @@ function endMatch(winner) {
   updateScoreboard();
   disableInputs(true);
 
+  const loser = winner === "blue" ? "red" : "blue";
+
+  // FIX #3: Add win/lose states on avatars
+  const winningAvatar = document.getElementById(TEAM_CONFIG[winner].avatarId);
+  winningAvatar?.classList.add("is-winning");
+
+  const losingAvatar = document.getElementById(TEAM_CONFIG[loser].avatarId);
+  losingAvatar?.classList.add("is-losing");
+
   elements.victoryCard.className = `victory-card victory-card--${winner}`;
   elements.victoryTitle.textContent = "WINNER";
   elements.victoryTeam.textContent = winner === "blue" ? "BLUE TEAM" : "RED TEAM";
   elements.victoryScore.textContent = `BLUE ${state.score.blue} – RED ${state.score.red}`;
   elements.victoryOverlay.hidden = false;
   elements.victoryOverlay.setAttribute("aria-hidden", "false");
-
-  const winningAvatar = document.getElementById(TEAM_CONFIG[winner].avatarId);
-  winningAvatar?.classList.add("is-winning");
 
   playVictoryFanfare();
   createConfetti(winner);
@@ -424,7 +422,9 @@ function restartRound() {
   elements.victoryOverlay.setAttribute("aria-hidden", "true");
   elements.confettiLayer.innerHTML = "";
 
-  document.querySelectorAll(".sumo-svg").forEach((avatar) => avatar.classList.remove("is-winning"));
+  document.querySelectorAll(".sumo-svg").forEach((avatar) => {
+    avatar.classList.remove("is-winning", "is-losing");
+  });
   disableInputs(false);
 
   generateQuestion("blue");
@@ -541,7 +541,12 @@ function renderTeam(team) {
   if (!questionEl || !helperEl || !answerEl || !panelEl) return;
 
   questionEl.textContent = teamState.questionText;
-  answerEl.textContent = teamState.input || "_";
+
+  // FIX #6 (Keypad display cleanup): Parse display value as int to remove leading zeros
+  // This is DISPLAY-ONLY — the underlying teamState.input stays as-is for backend validation.
+  const rawInput = teamState.input;
+  const displayValue = rawInput ? String(parseInt(rawInput, 10)) : "";
+  answerEl.textContent = displayValue || "_";
 
   panelEl.classList.remove("is-disabled");
   helperEl.textContent = "Enter answer, then press OK";
